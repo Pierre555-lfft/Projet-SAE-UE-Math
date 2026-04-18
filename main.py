@@ -14,8 +14,11 @@ from methodes_iteratives import (
     ajuster_surface_par_newton,
     ajuster_surface_par_bfgs,
 )
-from affichage import afficher_profil, afficher_convergence
-
+from affichage import (
+    afficher_profil, 
+    afficher_convergence_cout,
+    afficher_convergence_gradient
+)
 
 # fonction qui demande à l'utilisateur de saisir un nombre réel 
 def demander_flottant(message, valeur_defaut):
@@ -107,7 +110,16 @@ def main():
         )
 
     afficher_profil(points_extrados, points_intrados, resultat_extrados, resultat_intrados)
-    afficher_convergence(resultat_extrados, resultat_intrados)
+    if "historique_cout_y" in resultat_extrados:
+        afficher_convergence_cout(
+            resultat_extrados, 
+            resultat_intrados
+        )
+    else:
+        print(
+            "Pas de courbe de convergence "
+            "pour cette méthode direct"
+        )
 
 
 if __name__ == "__main__":

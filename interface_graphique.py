@@ -15,16 +15,20 @@ from methodes_iteratives import (
     ajuster_surface_par_newton,
     ajuster_surface_par_bfgs,
 )
-from affichage import afficher_profil, afficher_convergence
+from affichage import (
+    afficher_profil,
+    afficher_convergence_cout,
+    afficher_convergence_gradient,
+)
 
 
 # application graphique
 class ApplicationOptimisation:
-    # fonction qui initialisation l'application graphique
+    # fonction qui initialise l'application graphique
     def __init__(self, fenetre):
         self.fenetre = fenetre
         self.fenetre.title("Optimisation géométrique d’un profil NACA")
-        self.fenetre.geometry("650x520")
+        self.fenetre.geometry("760x520")
 
         self.resultat_extrados = None
         self.resultat_intrados = None
@@ -32,8 +36,8 @@ class ApplicationOptimisation:
         self.points_intrados = None
 
         self.creer_widgets()
-    
-    # fonction qui crée et organise les éléments graphique de l'interface 
+
+    # fonction qui crée et organise les éléments graphiques de l'interface
     def creer_widgets(self):
         cadre = ttk.Frame(self.fenetre, padding=15)
         cadre.pack(fill="both", expand=True)
@@ -45,7 +49,6 @@ class ApplicationOptimisation:
         )
         titre.grid(row=0, column=0, columnspan=2, pady=(0, 15))
 
-        # Paramètres NACA
         ttk.Label(cadre, text="Cambrure maximale m :").grid(row=1, column=0, sticky="w", pady=5)
         self.entree_m = ttk.Entry(cadre)
         self.entree_m.insert(0, "0.08")
@@ -97,7 +100,6 @@ class ApplicationOptimisation:
         self.entree_pas.insert(0, "0.01")
         self.entree_pas.grid(row=8, column=1, sticky="ew", pady=5)
 
-        # Boutons
         cadre_boutons = ttk.Frame(cadre)
         cadre_boutons.grid(row=9, column=0, columnspan=2, pady=20)
 
@@ -106,39 +108,45 @@ class ApplicationOptimisation:
             text="Lancer l’optimisation",
             command=self.lancer_optimisation,
         )
-        bouton_lancer.grid(row=0, column=0, padx=5)
+        bouton_lancer.grid(row=0, column=0, padx=5, pady=5)
 
         bouton_afficher = ttk.Button(
             cadre_boutons,
             text="Afficher le profil",
             command=self.afficher_resultat,
         )
-        bouton_afficher.grid(row=0, column=1, padx=5)
+        bouton_afficher.grid(row=0, column=1, padx=5, pady=5)
 
-        bouton_convergence = ttk.Button(
+        bouton_cout = ttk.Button(
             cadre_boutons,
-            text="Afficher la convergence",
-            command=self.afficher_convergence_resultat,
+            text="Convergence du coût",
+            command=self.afficher_convergence_cout_resultat,
         )
-        bouton_convergence.grid(row=0, column=2, padx=5)
+        bouton_cout.grid(row=0, column=2, padx=5, pady=5)
+
+        bouton_gradient = ttk.Button(
+            cadre_boutons,
+            text="Convergence du gradient",
+            command=self.afficher_convergence_gradient_resultat,
+        )
+        bouton_gradient.grid(row=0, column=3, padx=5, pady=5)
 
         bouton_quitter = ttk.Button(
             cadre_boutons,
             text="Quitter",
             command=self.fenetre.destroy,
         )
-        bouton_quitter.grid(row=0, column=3, padx=5)
+        bouton_quitter.grid(row=0, column=4, padx=5, pady=5)
 
-        # Zone de résultats
         ttk.Label(cadre, text="Résultats :").grid(row=10, column=0, columnspan=2, sticky="w", pady=(10, 5))
 
-        self.zone_resultats = tk.Text(cadre, height=10, width=70)
+        self.zone_resultats = tk.Text(cadre, height=10, width=80)
         self.zone_resultats.grid(row=11, column=0, columnspan=2, sticky="nsew")
 
         cadre.columnconfigure(1, weight=1)
         cadre.rowconfigure(11, weight=1)
 
-    # fonction qui lit et convertit les paramètres saisie par l'utilisateur
+    # fonction qui lit et convertit les paramètres saisis par l'utilisateur
     def lire_parametres(self):
         try:
             m = float(self.entree_m.get())
@@ -152,7 +160,16 @@ class ApplicationOptimisation:
             raise ValueError("Un ou plusieurs paramètres sont invalides.")
 
         return m, p, t, nb_points, nb_points_controle, degre, pas
-    
+
+    # teste si la méthode sélectionnée est itérative
+    def methode_iterative_disponible(self):
+        return (
+            self.resultat_extrados is not None
+            and self.resultat_intrados is not None
+            and "historique_cout_y" in self.resultat_extrados
+            and "historique_gradient_y" in self.resultat_extrados
+        )
+
     # fonction qui lance l'optimisation du profil NACA
     def lancer_optimisation(self):
         try:
@@ -245,7 +262,7 @@ class ApplicationOptimisation:
         except Exception as e:
             messagebox.showerror("Erreur", str(e))
 
-    # fonction (bouton) qui permet d'afficher graphiquement le profil optimiser
+    # fonction (bouton) qui permet d'afficher graphiquement le profil optimisé
     def afficher_resultat(self):
         if self.resultat_extrados is None or self.resultat_intrados is None:
             messagebox.showwarning("Attention", "Lance d’abord une optimisation.")
@@ -258,20 +275,36 @@ class ApplicationOptimisation:
             self.resultat_intrados,
         )
 
-    # fonction (bouton) qui permet d'afficher graphiquement les courbes de convergence
-    def afficher_convergence_resultat(self):
+    # bouton d'affichage de la convergence du coût
+    def afficher_convergence_cout_resultat(self):
         if self.resultat_extrados is None or self.resultat_intrados is None:
             messagebox.showwarning("Attention", "Lance d’abord une optimisation.")
             return
 
-        if "historique_cout_y" not in self.resultat_extrados:
+        if not self.methode_iterative_disponible():
             messagebox.showinfo(
                 "Information",
-                "Pas de courbe de convergence disponible pour cette méthode directe."
+                "La convergence du coût n’est disponible que pour les méthodes itératives."
             )
             return
 
-        afficher_convergence(self.resultat_extrados, self.resultat_intrados)
+        afficher_convergence_cout(self.resultat_extrados, self.resultat_intrados)
+
+    # bouton d'affichage de la convergence du gradient
+    def afficher_convergence_gradient_resultat(self):
+        if self.resultat_extrados is None or self.resultat_intrados is None:
+            messagebox.showwarning("Attention", "Lance d’abord une optimisation.")
+            return
+
+        if not self.methode_iterative_disponible():
+            messagebox.showinfo(
+                "Information",
+                "La convergence du gradient n’est disponible que pour les méthodes itératives."
+            )
+            return
+
+        afficher_convergence_gradient(self.resultat_extrados, self.resultat_intrados)
+
 
 # point d'entrée du programme
 if __name__ == "__main__":

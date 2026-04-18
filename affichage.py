@@ -1,5 +1,3 @@
-
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -53,8 +51,8 @@ def afficher_profil(points_extrados, points_intrados, resultat_extrados, resulta
     plt.show()
 
 
-# fonction qui affiche la convergence de l’algorithme d’optimisation.
-def afficher_convergence(resultat_extrados, resultat_intrados):
+# fonction qui affiche uniquement la convergence du coût
+def afficher_convergence_cout(resultat_extrados, resultat_intrados):
     if "historique_cout_y" not in resultat_extrados:
         return
 
@@ -69,6 +67,11 @@ def afficher_convergence(resultat_extrados, resultat_intrados):
     plt.legend()
     plt.tight_layout()
     plt.show()
+    
+# fonction qui affiche uniquement la convergence du gradient
+def afficher_convergence_gradient(resultat_extrados, resultat_intrados):
+    if "historique_gradient_y" not in resultat_extrados:
+        return
 
     plt.figure(figsize=(10, 4))
     plt.plot(resultat_extrados["historique_gradient_y"], label="||grad|| extrados")
