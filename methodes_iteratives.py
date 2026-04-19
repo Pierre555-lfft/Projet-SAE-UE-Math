@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# 2026
+# SAE Modélisation et calcul scientifique
+# Kolli Laforest Soulez
+
 import numpy as np  # bibliothèque utilisée pour les calculs vectoriels et matriciels
 
 # import des fonctions nécessaires pour construire le problème

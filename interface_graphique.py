@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# 2026
+# SAE Modélisation et calcul scientifique
+# Kolli Laforest Soulez
+
 import tkinter as tk  # bibliothèque principale pour créer l'interface graphique
 from tkinter import ttk, messagebox  # widgets améliorés + boîtes de dialogue
 

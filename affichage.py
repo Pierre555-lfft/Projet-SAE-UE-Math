@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# 2026
+# SAE Modélisation et calcul scientifique
+# Kolli Laforest Soulez
+
 import matplotlib.pyplot as plt  # bibliothèque utilisée pour tracer les graphiques
 
 

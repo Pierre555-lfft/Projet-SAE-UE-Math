@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# 2026
+# SAE Modélisation et calcul scientifique
+# Kolli Laforest Soulez
+
 # import de la fonction qui génère le profil NACA cible
 from profils import generer_profil_naca
 
